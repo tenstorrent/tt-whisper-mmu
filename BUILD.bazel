@@ -1,0 +1,13 @@
+cc_library(
+    name       = "tt-whisper-mmu",
+    srcs       = ["DvMmu.cpp"],
+    hdrs       = ["DvMmu.hpp", "MemModel.hpp"],
+    deps       = ["@whisper//:virtual_memory", "@whisper//:rvcore"],
+    visibility = ["//visibility:public"],
+)
+
+cc_binary(
+    name = "sample",
+    srcs = ["sample.cpp"],
+    deps = ["tt-whisper-mmu"],
+)

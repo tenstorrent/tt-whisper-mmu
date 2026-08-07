@@ -1,0 +1,4 @@
+[submodule "whisper"]
+	path = whisper
+	url = https://github.com/tenstorrent/whisper.git
+	branch = master
