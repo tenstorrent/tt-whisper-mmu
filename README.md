@@ -75,6 +75,67 @@ attempted for read, write, or fetch (execute) access. Here's an example for read
     assert(ec == ExceptionCause::NONE);
 ```
 
-## Configuring Physical Memory Protection.
+## Configuring Physical Memory Protection
 
-## Configuring Physical Memory Attributes.
+Physical Memory Protection (PMP) is modeled by mapping the RISC-V `pmpcfg` and
+`pmpaddr` CSRs to memory-mapped register addresses and then writing them the
+same way the target would. Calling `definePmpRegs` places the registers and
+enables PMP enforcement; subsequent translations reject accesses that fall
+outside the granted region permissions.
+
+```
+// Map 2 pmpcfg registers at 0x1000 and 16 pmpaddr registers at 0x2000.
+// Each register is 8 bytes, so register i is at base + i*8.
+mmu.definePmpRegs(0x1000 /*pmpcfg base*/, 2 /*count*/,
+                  0x2000 /*pmpaddr base*/, 16 /*count*/);
+
+// Program pmpaddr0..2 (written values are legalized as the CSRs would be).
+mmu.mmrWrite(0x2000, 0x400);   // pmpaddr0
+mmu.mmrWrite(0x2008, 0x400);   // pmpaddr1
+mmu.mmrWrite(0x2010, 0x400);   // pmpaddr2
+
+// Program pmpcfg0 (packs eight per-region config bytes: R/W/X, A, L).
+mmu.mmrWrite(0x1000, /* pmpcfg value */);
+```
+
+Registers are read back with `mmrRead`. Once configured, `translate` returns an
+access-fault exception cause for an access that violates the configured PMP
+permissions.
+
+## Configuring Physical Memory Attributes
+
+Physical Memory Attributes (PMA) are configured the same way via
+`definePmaRegs`, which maps the `pmacfg` (and, optionally, `pmamask`) registers
+and enables PMA checking:
+
+```
+// Map 16 pmacfg registers at 0x7e0 (no pmamask registers in this example).
+// Signature: definePmaRegs(cfgAddr, cfgCount, pmamaskAddr = 0, pmamaskCount = 0)
+mmu.definePmaRegs(0x7e0, 16);
+
+// Program pmacfg0 with the region's base/size and permissions.
+mmu.mmrWrite(0x7e0, 0xb8000000000000e7);
+```
+
+As with PMP, written values are legalized, and a translated physical address
+that falls outside every defined PMA region — or lacks the required read, write,
+or execute attribute — causes the translation to fail.
+
+## Contributing
+
+Bugs are reported via [GitHub Issues](../../issues); bug fixes and new
+functionality are submitted via Pull Requests, which are reviewed on a weekly
+cadence. See [CONTRIBUTING.md](CONTRIBUTING.md) for details, and
+[CODE_OF_CONDUCT.md](CODE_OF_CONDUCT.md) for community expectations. To report a
+security vulnerability, follow [SECURITY.md](SECURITY.md) instead of opening a
+public issue.
+
+## License
+
+| File | Applies to |
+|------|------------|
+| [LICENSE](LICENSE) (Apache License 2.0) | Overall license for this project, except where specified |
+| [LICENSE_understanding.txt](LICENSE_understanding.txt) | Tenstorrent's clarification of how the Apache 2.0 license applies to this repository |
+
+The `whisper/` submodule is a third-party dependency and retains its own
+upstream license; see [NOTICE](NOTICE) for attribution.
