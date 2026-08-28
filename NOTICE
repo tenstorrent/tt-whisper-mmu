@@ -20,11 +20,13 @@ Third-Party Dependencies:
 This repository is a thin wrapper (DvMmu.cpp/.hpp, MemModel.hpp, sample.cpp)
 around the following third-party component, which is included as a git submodule
 and retains its own upstream license. Consult the upstream project for full
-terms; the license identifier below should be verified by OSPO/legal before
-public release.
+terms.
 
 - Whisper (whisper/)
   RISC-V instruction-set simulator; this project uses its VirtMem, PmpManager,
   and PmaManager as the address-translation reference model.
   Upstream: https://github.com/tenstorrent/whisper
-  License: verify with upstream.
+  License: Apache License, Version 2.0 (confirmed via the upstream repository's
+  license metadata and LICENSE file, https://github.com/tenstorrent/whisper).
+  Whisper's own third-party dependency notices, if any, are documented within
+  that repository.
